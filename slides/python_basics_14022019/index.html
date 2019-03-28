@@ -901,8 +901,9 @@ print(say(say_please=True))
 ## HTML/CCS/JS and HTTP
 </script></section><section data-markdown><script type="text/template">
 1. Flask and templates
+1. CSS and Bootstrap framework
 </script></section></section><section ><section data-markdown><script type="text/template">
-### Flask and templates
+### Flask, Jinja2 and HTML templates
 </script></section><section data-markdown><script type="text/template">
 To install flask, we need execute in our virtualenv:
 
@@ -938,7 +939,331 @@ With template:
 </body>
 </html>
 ```
-</script></section></section></div>
+</script></section><section data-markdown><script type="text/template">
+Jinja templates may contain __variables__ and/or __expressions__. Once template is __rendered__ they get replaced with __values__.
+</script></section><section data-markdown><script type="text/template">
+Default Jinja delimiters are configured as follows:
+
+- `{% ... %}` for <a href="http://jinja.pocoo.org/docs/2.10/templates/#list-of-control-structures">Statements</a>
+- `{{ ... }}` for <a href="http://jinja.pocoo.org/docs/2.10/templates/#expressions">Expressions</a> to print to the template output
+- `{# ... #}` for <a href="http://jinja.pocoo.org/docs/2.10/templates/#comments">Comments</a> not included in the template output
+</script></section><section data-markdown><script type="text/template">
+Let's try to pass some values into our template:
+
+```python
+from flask import Flask, render_template
+
+app = Flask(__name__)
+
+@app.route('/hello/')
+@app.route('/hello/<name>')
+def hello_world(name=None):
+    return render_template('hello.html', name=name)
+
+if __name__ == "__main__":
+    app.run()
+```
+</script></section><section data-markdown><script type="text/template">
+And let's render `name` variable inside our template:
+
+```html
+<!doctype html>
+<html>
+<head>
+    <title>Hello world</title>
+</head>
+<body>
+    {% if name %}
+        <h1>Hello {{ name }}!</h1>
+    {% else %}
+        <h1>Hello, World!</h1>
+    {% endif %}
+</body>
+</html>
+```
+</script></section><section data-markdown><script type="text/template">
+And what about iterable data like arrays?
+
+```python
+from flask import Flask, render_template
+
+app = Flask(__name__)
+
+DATA = [
+    { "id": 1, "first_name": "Kamil", "last_name": "Biedrzycki" },
+    { "id": 2, "first_name": "Lukasz", "last_name": "Dziewanowski" }
+]
+
+@app.route('/')
+def hello():
+    return render_template('hello.html', data=DATA)
+
+if __name__ == "__main__":
+    app.run()
+```
+</script></section><section data-markdown><script type="text/template">
+And template:
+
+```html
+<ul>
+    {% for user in data %}
+        <li>
+            #{{user.id}}. {{user.first_name}} {{user.last_name}}
+        </li>
+    {% endfor %}
+</ul>
+```
+</script></section><section data-markdown><script type="text/template">
+#### Template Inheritance
+</script></section><section data-markdown><script type="text/template">
+Imagine two pages:
+
+`a.html`:
+
+```html
+<!doctype html>
+<html>
+<head>
+    <title>AirHelp Blog</title>
+</head>
+<body>
+    <header>
+        Welcome to our blog
+    </header>
+    <article>
+        a.html contents
+    </article>
+</body>
+</html>
+```
+</script></section><section data-markdown><script type="text/template">
+`b.html`:
+
+```html
+<!doctype html>
+<html>
+<head>
+    <title>AirHelp Blog</title>
+</head>
+<body>
+    <header>
+        Welcome to our blog
+    </header>
+    <article>
+        b.html contents
+    </article>
+</body>
+</html>
+```
+</script></section><section data-markdown><script type="text/template">
+Can you see some potential problems with this approach?
+</script></section><section data-markdown><script type="text/template">
+1. We are repeating ourselves (not following <a href="https://en.wikipedia.org/wiki/Don%27t_repeat_yourself">DRY</a> rule)
+1. If we would like to update some part of layout, we have to do this for all the pages
+1. Copy & paste programming
+</script></section><section data-markdown><script type="text/template">
+It's just sad :(
+
+<img src="https://i.imgflip.com/axiul.jpg" alt="Sad">
+</script></section><section data-markdown><script type="text/template">
+But it can be fixed!
+</script></section><section data-markdown><script type="text/template">
+Thanks to the template inheritance we can easily create base, skeleton template that contains common elements and override __blocks__ of parent template with child pages.
+
+Sounds complicated, so let's directly jump to example to see how really simple it is.
+</script></section><section data-markdown><script type="text/template">
+Let's create `base.html` template using previous `a.html` and `b.html` pages:
+
+```html
+<!doctype html>
+<html>
+<head>
+    <title>{% block title %}AirHelp Blog{% endblock %}</title>
+</head>
+<body>
+    <header>
+        {% block header %}Welcome to our blog{% endblock %}
+    </header>
+    <article>
+        {% block content %}{% endblock %}
+    </article>
+</body>
+</html>
+```
+</script></section><section data-markdown><script type="text/template">
+So, what about *a* or *b* page now?
+
+```html
+{% extends "base.html" %}
+{% block title %}Page A{% endblock %}
+{% block content %}
+    <h1>This is Page A</h1>
+    <p>a.html contents</p>
+{% endblock %}
+```
+</script></section><section data-markdown><script type="text/template">
+Much better now!
+
+<img src="https://www.wallpaperup.com/uploads/wallpapers/2014/02/11/252308/c95c61be7a901ea649fa12ec08267ab6-700.jpg" alt="" width="500">
+</script></section></section><section ><section data-markdown><script type="text/template">
+### CSS and Bootstrap framework
+</script></section><section data-markdown><script type="text/template">
+<img src="https://upload.wikimedia.org/wikipedia/commons/e/ea/Boostrap_logo.svg" width="150" style="border: 0; background: none; box-shadow: none;">
+
+<a href="https://getbootstrap.com/">Bootstrap</a> is an open source toolkit for developing with HTML, CSS, and JS. It can be used to quickly prototype ideas or build entire applications. It contains set of useful components that one can use as building blocks of web application.
+</script></section><section data-markdown><script type="text/template">
+Installation:
+
+```
+# with npm
+npm install bootstrap
+
+# with CDN
+## CSS:
+<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+
+## JS:
+<script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous">__SCRIPT_END__
+<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js" integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1" crossorigin="anonymous">__SCRIPT_END__
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js" integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM" crossorigin="anonymous">__SCRIPT_END__
+```
+</script></section><section data-markdown><script type="text/template">
+Let's start with __container__:
+
+```html
+<div class="container">
+  <!-- Content here, takes max-width from breakpoint -->
+</div>
+```
+
+or 
+
+```html
+<div class="container-fluid">
+  <!-- Content here, takes 100% place -->
+</div>
+```
+</script></section><section data-markdown><script type="text/template">
+Next, let's define columns using <a href="https://getbootstrap.com/docs/4.3/layout/grid/">__grid__</a> system:
+
+```html
+<div class="container">
+  <div class="row">
+    <div class="col">
+      1 / 2
+    </div>
+    <div class="col">
+      2 / 2
+    </div>
+  </div>
+  <div class="row">
+    <div class="col">
+      1 / 3
+    </div>
+    <div class="col">
+      2 / 3
+    </div>
+    <div class="col">
+      3 / 3
+    </div>
+  </div>
+</div>
+```
+</script></section><section data-markdown><script type="text/template">
+Useful notes about Grid:
+
+1. By default, Bootstrap grid system is based on 12 columns and 5 different breakpoints
+1. Columns are nestable (you can define rows inside columns inside rows and so on...)
+</script></section><section data-markdown><script type="text/template">
+Column class name can contain device size and column width.
+
+Example column class names:
+
+```html
+col-12 - extra small device, width of 12 / 12 columns
+col-sm-6 - small device, takes 6 of 12 available columns
+col-md-10 - medium device, 10 of 12
+col-lg-3 - large device, 3 of 12
+col-xl-2 - extra large, 2 of 12
+```
+</script></section><section data-markdown><script type="text/template">
+#### Couple of components / use cases
+</script></section><section data-markdown><script type="text/template">
+##### Button
+
+Button is an element that indicates possible action in form or dialog.
+
+```html
+<input class="btn btn-primary" type="submit" value="Submit">
+<input class="btn btn-danger" type="reset" value="Reset">
+```
+</script></section><section data-markdown><script type="text/template">
+##### Badge
+
+Badge is a component that can be used as a label for other elements, mostly used as a counters.
+
+```html
+<span class="badge badge-primary">102</span>
+<span class="badge badge-secondary">99</span>
+
+# Badge + Button
+<button type="button" class="btn btn-primary">
+  Profile <span class="badge badge-light">9</span>
+</button>
+```
+</script></section><section data-markdown><script type="text/template">
+##### Table
+
+Table is an HTML element used to present tabular data - information stored in rows and columns of cells.
+
+```html
+<table class="table table-striped">
+  <thead>
+    <tr>
+      <th scope="col">#</th>
+      <th scope="col">First</th>
+      <th scope="col">Last</th>
+      <th scope="col">Teams</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th scope="row">1</th>
+      <td>Łukasz</td>
+      <td>Dziewanowski</td>
+      <td>QA, Zulu</td>
+    </tr>
+    <tr>
+      <th scope="row">2</th>
+      <td>Kamil</td>
+      <td>Biedrzycki</td>
+      <td>Vertigo, Pilots</td>
+    </tr>
+  </tbody>
+</table>
+```
+</script></section><section data-markdown><script type="text/template">
+##### Form
+
+Forms are main point of interaction between users and web application.
+
+```html
+<form action="/submit" method="post">
+  <div class="form-group">
+    <label for="email-address">Email address</label>
+    <input type="email" class="form-control" id="email-address" placeholder="Enter email" required>
+  </div>
+  <div class="form-group">
+    <label for="password">Password</label>
+    <input type="password" class="form-control" id="password" placeholder="Password" required>
+  </div>
+  <div class="form-group form-check">
+    <input type="checkbox" class="form-check-input" id="remember-me">
+    <label class="form-check-label" for="remember-me">Remember me</label>
+  </div>
+  <input type="submit" class="btn btn-primary" value="Submit">
+</form>
+```</script></section></section></div>
         </div>
 
         <script src="./lib/js/head.min.js"></script>
